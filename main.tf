@@ -70,22 +70,53 @@ resource "google_cloud_run_v2_service" "cloud-run-frontend" {
       ports {
         container_port = 3000
       }
-      startup_probe {
-        http_get {
-          port = 3000
-        }
+      resources {
+          limits = {
+            "cpu" = "4"
+            "memory" = "16Gi"
+          }
       }
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/ghcr-custom-remote/3d4c/3d-4connect/frontend:latest"
+    
+    image = "${var.region}-docker.pkg.dev/${var.project_id}/ghcr-custom-remote/3d4c/3d-4connect/frontend:latest"
+    
+    env {
+        name  = "REACT_APP_API_URL"
+        value = google_cloud_run_v2_service.cloud-run-backend.uri
+      }
     }
+
   }
 }
+
+# This maps the Cloudflare domain to the Cloud Run service 
+resource "google_cloud_run_domain_mapping" "default" {
+  name     = "3d4c.com" // Provisioned via Cloudflare :) 
+  location = google_cloud_run_v2_service.cloud-run-frontend.location
+  metadata {
+    namespace = data.google_project.project.project_id
+  }
+  spec {
+    route_name = google_cloud_run_v2_service.cloud-run-frontend.name
+  }
+}
+
+# Allow all user access
+resource "google_cloud_run_service_iam_binding" "cloud-run-frontend" {
+  location = google_cloud_run_v2_service.cloud-run-frontend.location
+  service  = google_cloud_run_v2_service.cloud-run-frontend.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}
+
 
 # Serves container for the backend
 resource "google_cloud_run_v2_service" "cloud-run-backend" {
   name     = "backend-tf"
   location = var.region
   deletion_protection = false
-  ingress = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  ingress = "INGRESS_TRAFFIC_ALL"
   template {
     containers {
       name = "backend"
@@ -93,11 +124,16 @@ resource "google_cloud_run_v2_service" "cloud-run-backend" {
       ports {
         container_port = 8080
       }
-      startup_probe {
-        http_get {
-          port = 8080
-        }
-      }
     }
   }
+}
+
+# Allow all user access
+resource "google_cloud_run_service_iam_binding" "cloud-run-backend" {
+  location = google_cloud_run_v2_service.cloud-run-backend.location
+  service  = google_cloud_run_v2_service.cloud-run-backend.name
+  role = "roles/run.invoker"
+    members = [
+      "allUsers",
+    ] 
 }
