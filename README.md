@@ -21,3 +21,4 @@ terraform apply
 ## What is included? 
 
 Take a look at this diagram, we spin up two cloud run instances by using the mirrored container images from ghcr.io. Note: both backend and frontend are freely accessible as of now. 
+<img width="912" height="754" alt="Infra drawio" src="https://github.com/user-attachments/assets/a1f31266-b8e0-43fd-8ff0-c5c8254195a2" />
