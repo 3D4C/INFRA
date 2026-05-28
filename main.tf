@@ -93,17 +93,6 @@ resource "google_cloud_run_v2_service" "cloud-run-frontend" {
   }
 }
 
-# This maps the Cloudflare domain to the Cloud Run service 
-resource "google_cloud_run_domain_mapping" "default" {
-  name     = "3d4c.com" // Provisioned via Cloudflare :) 
-  location = google_cloud_run_v2_service.cloud-run-frontend.location
-  metadata {
-    namespace = data.google_project.project.project_id
-  }
-  spec {
-    route_name = google_cloud_run_v2_service.cloud-run-frontend.name
-  }
-}
 
 # Allow all user access
 resource "google_cloud_run_service_iam_binding" "cloud-run-frontend" {
