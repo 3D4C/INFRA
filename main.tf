@@ -70,7 +70,6 @@ resource "google_cloud_run_v2_service" "cloud-run-frontend" {
       max_instance_count = 1
     }
     containers {
-      startup_cpu_boost = true
       name = "frontend"
       ports {
         container_port = 3000
@@ -128,7 +127,6 @@ resource "google_cloud_run_v2_service" "cloud-run-backend" {
       max_instance_count = 1
     }
     containers {
-      startup_cpu_boost = true
       name = "backend"
       image = "${var.region}-docker.pkg.dev/${var.project_id}/ghcr-custom-remote/3d4c/3d-4connect/backend:latest"
       ports {

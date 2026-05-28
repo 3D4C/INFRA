@@ -8,6 +8,7 @@ output "secret_versions" {
   description = "List of secret versions"
 }
 
-output "backend_ip" {
-    value = module.google_cloud_run_v2_servic
+output "backend_uri" {
+    value       = google_cloud_run_v2_service.cloud-run-backend.uri
+    description = "Backend Cloud Run service URI"
 }
