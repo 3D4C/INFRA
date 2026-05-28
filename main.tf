@@ -65,7 +65,12 @@ resource "google_cloud_run_v2_service" "cloud-run-frontend" {
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
   template {
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 1
+    }
     containers {
+      startup_cpu_boost = true
       name = "frontend"
       ports {
         container_port = 3000
@@ -76,9 +81,9 @@ resource "google_cloud_run_v2_service" "cloud-run-frontend" {
             "memory" = "16Gi"
           }
       }
-    
+
     image = "${var.region}-docker.pkg.dev/${var.project_id}/ghcr-custom-remote/3d4c/3d-4connect/frontend:latest"
-    
+
     env {
         name  = "REACT_APP_API_URL"
         value = google_cloud_run_v2_service.cloud-run-backend.uri
@@ -118,7 +123,12 @@ resource "google_cloud_run_v2_service" "cloud-run-backend" {
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
   template {
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 1
+    }
     containers {
+      startup_cpu_boost = true
       name = "backend"
       image = "${var.region}-docker.pkg.dev/${var.project_id}/ghcr-custom-remote/3d4c/3d-4connect/backend:latest"
       ports {
