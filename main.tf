@@ -53,9 +53,10 @@ resource "google_artifact_registry_repository" "ghcr-artifact-registry" {
 
 # Granting artifact registry permissions to the tf service account
 resource "google_artifact_registry_repository_iam_member" "upstream-access" {
-  repository = "ghcr-artifact-registry"
-  role      = "roles/artifactregistry.admin"
-  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+  repository = google_artifact_registry_repository.ghcr-artifact-registry.name
+  location   = google_artifact_registry_repository.ghcr-artifact-registry.location
+  role       = "roles/artifactregistry.admin"
+  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
 }
 
 # Serves container for the frontend
@@ -65,6 +66,10 @@ resource "google_cloud_run_v2_service" "cloud-run-frontend" {
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
   template {
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 1
+    }
     containers {
       name = "frontend"
       ports {
@@ -118,6 +123,10 @@ resource "google_cloud_run_v2_service" "cloud-run-backend" {
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
   template {
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 1
+    }
     containers {
       name = "backend"
       image = "${var.region}-docker.pkg.dev/${var.project_id}/ghcr-custom-remote/3d4c/3d-4connect/backend:latest"
